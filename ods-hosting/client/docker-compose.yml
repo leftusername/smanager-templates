@@ -1,0 +1,21 @@
+x-SManager:
+  properties:
+    - ${PHP_IMAGE}
+  side_menu:
+    - Управление:
+        ${SITE_NAME}: http://${SITE_NAME}
+
+version: '3.1'
+
+services:
+  php:
+    image: ${PHP_IMAGE}
+    volumes:
+      - ./www:/code
+    networks:
+      - default
+      - external
+
+networks:
+  external:
+    name: ods-hosting-net

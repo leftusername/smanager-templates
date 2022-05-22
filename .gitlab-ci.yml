@@ -1,0 +1,19 @@
+variables:
+  GIT_STRATEGY: clone
+stages:
+  - build
+  - deploy
+
+build_nginx-hosting-provider:
+  stage: build
+  tags:
+    - gitlab
+  before_script:
+  script:
+    - cd ods-hosting/provider/nginx-consul
+    - pwd
+    - docker build -t ods/nginx-consul .
+ # when: manual
+  only:
+    - pushes
+    - web

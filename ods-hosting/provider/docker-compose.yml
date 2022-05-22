@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  nginx:
+    image: ods/nginx-consul
+    ports:
+      - "80:80"
+#      - "443:443"
+    networks:
+      - default
+      - ods-hosting-net
+
+  filebrowser:
+    image: hurlenko/filebrowser
+    user: "${UID}:${GID}"
+    ports:
+      - 443:8080
+    volumes:
+      - ./:/data
+#      - /CONFIG_DIR:/config
+    environment:
+      - FB_BASEURL=/filebrowser
+      - FB_NOAUTH=true
+#      - FB_USERNAME=user123
+#      - FB_PASSWORD=${PASS}
+    restart: always
+#    command: ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db", "--noauth"]
+    command: ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db"]
+    networks:
+      - default
+      - ods-hosting-net
+
+networks:
+  ods-hosting-net:
+    name: ods-hosting-net
