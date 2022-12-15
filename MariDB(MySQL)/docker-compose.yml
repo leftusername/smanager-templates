@@ -1,0 +1,55 @@
+x-SManager:
+  properties:
+    - "MYSQL_ROOT_PASSWORD: ${ODS_SM_GENERATE_RANDOM_RootPASS_20}"
+    - "MYSQL_PASSWORD ${ODS_SM_GENERATE_RANDOM_UserPASS_20}"
+    - "MYSQL_DATABASE: ${MYSQL_DATABASE}"
+    - "MYSQL_USER: ${MYSQL_USER}"
+    - "Adminer ext port: ${ADMINER_EXT_PORT}"
+    - "phpMyAdmin ext port: ${PHPMYADMIN_EXT_PORT}"
+    - "Database ext port: ${DB_EXT_PORT}"
+  side_menu:
+    - WEB интерфейсы:
+        Adminer: http://${ODS_SM_SERVER_IP}:15672
+        phpMyAdmin: http://${ODS_SM_SERVER_IP}:5001
+  ui_edit_vars:
+    DB Root Password: ODS_SM_GENERATE_RANDOM_RootPASS_20
+    DB password: ODS_SM_GENERATE_RANDOM_UserPASS_20
+    DB Username: MYSQL_USER
+    DB Name: MYSQL_DATABASE
+    Adminer ext port: ADMINER_EXT_PORT
+    phpMyAdmin ext port: PHPMYADMIN_EXT_PORT
+
+version: '3.1'
+services:
+  db:
+#    image: mysql
+    image: mariadb
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    ports:
+      - ${DB_EXT_PORT}:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+      - MYSQL_PASSWORD=${ODS_SM_GENERATE_RANDOM_UserPASS_20}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+  adminer:
+    image: adminer
+#    restart: always
+    ports:
+      - ${ADMINER_EXT_PORT}:8080
+    depends_on:
+      - db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.0
+    ports:
+      - ${PHPMYADMIN_EXT_PORT}:80
+    environment:
+      - PMA_ARBITRARY=1
+#      - PMA_HOST=mariadb
+    depends_on:
+      - db

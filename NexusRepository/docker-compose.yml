@@ -1,0 +1,21 @@
+x-SManager:
+  side_menu:
+    - Ссылки:
+        Nexus web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+  ui_edit_vars:
+    Внешний порт: ${EXT_PORT}
+  properties:
+    - "Логин по умолчанию: admin"
+    - "Пароль по умолчанию: в файле nexus-data/admin.password внутри конейнера"
+
+
+version: "3.3"
+
+services:
+  nexus:
+    image: sonatype/nexus3
+    volumes:
+      - "./nexus-data:/nexus-data"
+    ports:
+      - "${EXT_PORT}:8081"
+    restart: unless-stopped

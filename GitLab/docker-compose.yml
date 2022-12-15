@@ -1,0 +1,21 @@
+x-SManager:
+  side_menu:
+    - Ссылки:
+        GitLab web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+  ui_edit_vars:
+    Внешний порт: ${EXT_PORT}
+
+services:
+  web:
+    image: 'gitlab/gitlab-ce:14.0.1-ce.0'
+    restart: always
+#    hostname: '10.4.102.174'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://${ODS_SM_SERVER_IP}:${EXT_PORT}'
+    ports:
+      - '${EXT_PORT}:${EXT_PORT}'
+    volumes:
+      - './volume/config:/etc/gitlab'
+      - './volume/logs:/var/log/gitlab'
+      - './volume/data:/var/opt/gitlab'

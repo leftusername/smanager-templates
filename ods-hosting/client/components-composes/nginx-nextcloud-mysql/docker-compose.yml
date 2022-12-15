@@ -1,0 +1,73 @@
+x-SManager:
+  properties:
+    - ${PHP_IMAGE}
+    - ${NGINX_IMAGE}
+    - ${MYSQL_IMAGE}
+    - ${PHPMYADMIN_IMAGE}
+    - "DB name: mysql"
+    - "Логин DB: root"
+    - "Пароль DB: ${DB_PASSWORD}"
+  side_menu:
+    - Управление:
+        ${SITE_DOMAIN}: http://${SITE_DOMAIN}
+        phpMyAdmin: http://${ODS_SM_SERVER_IP}/phpmyadmin_${ODS_SM_COMPOSE_SYS_NAME}/
+  ui_edit_vars:
+    Домен: SITE_DOMAIN
+    Пароль БД: DB_PASSWORD
+
+version: '3.1'
+
+services:
+  nginx:
+    image: ${NGINX_IMAGE}
+    environment:
+      - SITE_DOMAIN=${SITE_DOMAIN}
+      - ODS_SM_COMPOSE_NAME=${ODS_SM_COMPOSE_SYS_NAME}
+    volumes:
+        - ./www/:/var/www/html
+    networks:
+      default:
+      external:
+    restart: unless-stopped
+
+  php:
+    image: ${PHP_IMAGE}
+    volumes:
+      - ./www/:/var/www/html
+    networks:
+      - default
+#      - external
+    restart: unless-stopped
+
+  mysql:
+    image: ${MYSQL_IMAGE}
+#    ports:
+#      - 3306:3306
+#    volumes:
+#      - mariadb-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - default
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: ${PHPMYADMIN_IMAGE}
+#    container_name: phpmyadmin
+    environment:
+        - PMA_ARBITRARY=1
+#        - PMA_HOST=db
+        - UPLOAD_LIMIT=300M
+        - PMA_ABSOLUTE_URI=/phpmyadmin_${ODS_SM_COMPOSE_SYS_NAME}
+        - ODS_SM_COMPOSE_NAME=${ODS_SM_COMPOSE_SYS_NAME}
+#    ports:
+#        - 8080:80
+    networks:
+      default:
+      external:
+    restart: unless-stopped
+
+networks:
+  external:
+    name: ods-hosting-net
+
