@@ -1,0 +1,56 @@
+x-SManager:
+  side_menu:
+    - Ссылки:
+        Nextcloud web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+  ui_edit_vars:
+    Внешний порт: ${EXT_PORT}
+  source:
+    branch: github
+    url: https://github.com/leftusername/smanager-templates.git
+    yaml_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/docker-compose.yml
+    readme_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/README.md
+
+
+version: '2'
+
+volumes:
+  nextcloud:
+  db:
+
+services:
+  db:
+    image: mariadb
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+      - MYSQL_PASSWORD=${ODS_SM_GENERATE_RANDOM_UserPASS_20}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+  app:
+    image: nextcloud:fpm
+    restart: always
+    links:
+      - db
+    environment:
+      - MYSQL_PASSWORD=${ODS_SM_GENERATE_RANDOM_UserPASS_20}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_HOST=db
+    volumes:
+      - ./nextcloud:/var/www/html
+
+
+  web:
+    image: nginx
+    restart: always
+    ports:
+      - ${EXT_PORT}:80
+    links:
+      - app
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nextcloud:/var/www/html

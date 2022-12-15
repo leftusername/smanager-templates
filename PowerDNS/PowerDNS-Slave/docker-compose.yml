@@ -1,0 +1,54 @@
+x-SManager:
+  properties:
+    - "Домен: ${DOMAIN}"
+    - "Master: ${MASTER_IP}"
+    - "Slave: ${SLAVE_IP}"
+  ui_edit_vars:
+    Домен: DOMAIN
+    Master IP: MASTER_IP
+    Slave IP: SLAVE_IP
+
+version: '3'
+
+services:
+  powerdns_slave:
+    image: pschiffe/pdns-mysql:alpine
+    ports:
+      - "53:53/udp"
+      - "53:53"
+    extra_hosts:
+      - 'ns1.${DOMAIN}:${SLAVE_IP}'
+      - 'ns2.${DOMAIN}:${MASTER_IP}'
+    hostname: ns1.ods.systems
+    environment:
+      PDNS_gmysql_dbname: "${DB_NAME}"
+      PDNS_slave: "yes"
+      PDNS_master: "no"
+      PDNS_superslave: "yes"
+      PDNS_version_string: "anonymous"
+      PDNS_disable_axfr: "yes"
+      PDNS_allow_notify_from: "${MASTER_IP}"
+      SUPERMASTER_IPS: "${MASTER_IP}"
+      MYSQL_ENV_MYSQL_HOST: "mysql"
+      MYSQL_ENV_MYSQL_PASSWORD: "${ODS_SM_GENERATE_RANDOM_dbuserpassword_20}"
+      MYSQL_ENV_MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_ENV_MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_ENV_MYSQL_ROOT_PASSWORD: "${ODS_SM_GENERATE_RANDOM_dbrootpassword_20}"
+    depends_on:
+      - mysql
+    restart: always
+
+  mysql:
+    image: mariadb:10.5-focal
+    command: --net-read-timeout=2000 --innodb_use_native_aio=0 --innodb_flush_method=fsync
+    environment:
+      MARIADB_PASSWORD: "${ODS_SM_GENERATE_RANDOM_dbuserpassword_20}"
+      MARIADB_DATABASE: "${DB_NAME}"
+      MARIADB_USER: "${DB_USERNAME}"
+      MARIADB_ROOT_PASSWORD: "${ODS_SM_GENERATE_RANDOM_dbrootpassword_20}"
+#      MYSQL_INITDB_SKIP_TZINFO: "1"
+    volumes:
+    - ./pdnsdb:/var/lib/mysql
+    ports:
+#      - "3306:3306"
+      - "3306"

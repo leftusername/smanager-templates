@@ -1,0 +1,35 @@
+x-SManager:
+  properties:
+    - "Login: ${LOGIN}"
+  ui_edit_vars:
+    Login: LOGIN
+    Password: ODS_SM_GENERATE_RANDOM_0_20
+
+version: '3.4'
+
+services:
+  samba:
+    command: -s "Mount;/mnt" -s "Bobs Volume;/mnt2;yes;no;no;${LOGIN}" -u "${LOGIN};${ODS_SM_GENERATE_RANDOM_0_20}"
+      -p
+    environment:
+      TZ: ${TIMEZONE}
+    image: dperson/samba
+    networks:
+    - default
+    ports:
+    - 137:137/udp
+    - 138:138/udp
+    - 139:139/tcp
+    - 445:445/tcp
+    read_only: true
+    restart: unless-stopped
+    stdin_open: true
+    tmpfs:
+    - /tmp
+    tty: true
+    volumes:
+    - /mnt:/mnt:z
+    - /mnt2:/mnt2:z
+
+networks:
+  default: null

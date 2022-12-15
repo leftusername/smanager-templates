@@ -1,0 +1,31 @@
+x-SManager:
+  properties:
+    - "Логин: ${ODS_SM_USER}"
+    - "Пароль: ${FM_PASSWORD}"
+  side_menu:
+    - Управление:
+        Файлы: http://${ODS_SM_SERVER_IP}/filebrowser_${ODS_SM_COMPOSE_SYS_NAME}
+  ui_edit_vars:
+    Пароль: FM_PASSWORD
+
+version: "3"
+services:
+  filebrowser:
+    image: ods/tinyfilemanager
+    environment:
+      - FM_USER=${ODS_SM_USER}
+      - FM_PASSWORD=${FM_PASSWORD}
+      - ODS_SM_COMPOSE_NAME=${ODS_SM_COMPOSE_SYS_NAME}
+#      - MAX_UPLOAD_SIZE=10000000
+#      - IP_RULESET_ON=AND
+#      - IP_RULESET_IP=192.168.0.102
+# must be id of www-data
+#    user: "${UID}:${GID}"
+    volumes:
+        - ../:/var/www/html/data
+    networks:
+      - external
+
+networks:
+  external:
+    name: ods-hosting-net

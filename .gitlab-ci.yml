@@ -10,10 +10,80 @@ build_nginx-hosting-provider:
     - gitlab
   before_script:
   script:
-    - cd ods-hosting/provider/nginx-consul
+    - cd ods-hosting/provider/nginx-consul-template
     - pwd
-    - docker build -t ods/nginx-consul .
- # when: manual
+    - docker build -t ods/nginx-consul-template .
+  when: manual
+  only:
+    - pushes
+    - web
+
+build_php7-0-hosting-client:
+  stage: build
+  tags:
+    - gitlab
+  before_script:
+  script:
+    - cd ods-hosting/client/php7.0-fpm
+    - pwd
+    - docker build -t ods/php7.0-fpm .
+  when: manual
+  only:
+    - pushes
+    - web
+
+build_php7-4-hosting-client:
+  stage: build
+  tags:
+    - gitlab
+  before_script:
+  script:
+    - cd ods-hosting/client/php7.4-fpm
+    - pwd
+    - docker build -t ods/php7.4-fpm .
+  when: manual
+  only:
+    - pushes
+    - web
+
+build_nginx-hosting-client:
+  stage: build
+  tags:
+    - gitlab
+  before_script:
+  script:
+    - cd ods-hosting/client/nginx-consul-agent
+    - pwd
+    - docker build -t ods/nginx-consul-agent .
+  when: manual
+  only:
+    - pushes
+    - web
+
+build_tinyfilemanager:
+  stage: build
+  tags:
+    - gitlab
+  before_script:
+  script:
+    - cd ods-hosting/client/tyny-file-manager
+    - pwd
+    - docker build -t ods/tinyfilemanager .
+  when: manual
+  only:
+    - pushes
+    - web
+
+build_phpmyadmin_hosting_client:
+  stage: build
+  tags:
+    - gitlab
+  before_script:
+  script:
+    - cd ods-hosting/client/phpmyadmin-consul-agent
+    - pwd
+    - docker build -t ods/phpmyadmin-consul-agent .
+  when: manual
   only:
     - pushes
     - web

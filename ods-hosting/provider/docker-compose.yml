@@ -1,34 +1,69 @@
+x-SManager:
+  properties:
+    - ${NGINX_IMAGE}
+    - ${CONSUL_IMAGE}
+
+
 version: "3"
 
 services:
   nginx:
-    image: ods/nginx-consul
+    image: ${NGINX_IMAGE}
+    environment:
+      - CONSUL_SERVER=consul
+      - CONSUL_PORT=8500
     ports:
       - "80:80"
 #      - "443:443"
     networks:
       - default
       - ods-hosting-net
+    depends_on:
+      - consul
+    restart: unless-stopped
 
-  filebrowser:
-    image: hurlenko/filebrowser
-    user: "${UID}:${GID}"
+#  filebrowser:
+#    image: ${FILEBROWSER_IMAGE}
+#    user: "${UID}:${GID}"
+##    ports:
+##      - 443:8080
+#    volumes:
+#      - ./:/data
+##      - /CONFIG_DIR:/config
+#    environment:
+#      - FB_BASEURL=/filebrowser
+#      - FB_NOAUTH=true
+##      - FB_USERNAME=user123
+##      - FB_PASSWORD=${PASS}
+#    restart: always
+##    command: ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db", "--noauth"]
+#    command: ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db"]
+#    networks:
+#      - default
+##      - ods-hosting-net
+
+#  filebrowser:
+#    image: ods/tinyfilemanager
+##    environment:
+##      - MAX_UPLOAD_SIZE=10000000
+##      - IP_RULESET_ON=AND
+##      - IP_RULESET_IP=192.168.0.102
+#    volumes:
+#        - ./www:/var/www/html/data
+#    networks:
+#      - ods-hosting-net
+
+
+
+  consul:
+    image: ${CONSUL_IMAGE}
     ports:
-      - 443:8080
-    volumes:
-      - ./:/data
-#      - /CONFIG_DIR:/config
-    environment:
-      - FB_BASEURL=/filebrowser
-      - FB_NOAUTH=true
-#      - FB_USERNAME=user123
-#      - FB_PASSWORD=${PASS}
-    restart: always
-#    command: ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db", "--noauth"]
-    command: ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db"]
+      - "8500:8500"
+      - "8600:8600/udp"
     networks:
-      - default
       - ods-hosting-net
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+    restart: unless-stopped
 
 networks:
   ods-hosting-net:
