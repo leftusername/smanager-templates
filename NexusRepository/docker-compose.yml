@@ -3,7 +3,7 @@ x-SManager:
     - Ссылки:
         Nexus web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
   ui_edit_vars:
-    Внешний порт: ${EXT_PORT}
+    Внешний порт: EXT_PORT
   properties:
     - "Логин по умолчанию: admin"
     - "Пароль по умолчанию: в файле nexus-data/admin.password внутри конейнера"

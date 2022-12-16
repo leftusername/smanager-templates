@@ -10,7 +10,7 @@ x-SManager:
     Домен: DOMAIN
     Master IP: MASTER_IP
     Slave IP: SLAVE_IP
-    Внешний порт PowerDNSAdmin: ${EXT_PORT}
+    Внешний порт PowerDNSAdmin: EXT_PORT
 
 
 version: '3'
