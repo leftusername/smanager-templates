@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+
+  redmine:
+    image: redmine
+    restart: always
+    ports:
+      - 8080:3000
+    environment:
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_PASSWORD: ${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+      REDMINE_SECRET_KEY_BASE: {ODS_SM_GENERATE_RANDOM_SecretKey_20}
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+      MYSQL_DATABASE: redmine

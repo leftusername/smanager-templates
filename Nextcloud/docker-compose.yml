@@ -3,7 +3,7 @@ x-SManager:
     - Ссылки:
         Nextcloud web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
   ui_edit_vars:
-    Внешний порт: ${EXT_PORT}
+    Внешний порт: EXT_PORT
   source:
     branch: github
     url: https://github.com/leftusername/smanager-templates.git

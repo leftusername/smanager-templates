@@ -3,8 +3,8 @@ x-SManager:
     - Ссылки:
         Nexus web: http://${ODS_SM_SERVER_IP}:${WEB_PORT}
   ui_edit_vars:
-    Порт Web: ${WEB_PORT}
-    Порт API: ${API_PORT}
+    Порт Web: WEB_PORT
+    Порт API: API_PORT
 
 version: '3.7'
 services:
