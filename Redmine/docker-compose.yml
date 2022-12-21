@@ -1,12 +1,18 @@
+x-SManager:
+  side_menu:
+    - Links:
+        Redmine web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+  ui_edit_vars:
+    External port: EXT_PORT
+
 version: '3.1'
 
 services:
-
   redmine:
     image: redmine
     restart: always
     ports:
-      - 8080:3000
+      - ${EXT_PORT}:3000
     environment:
       REDMINE_DB_MYSQL: db
       REDMINE_DB_PASSWORD: ${ODS_SM_GENERATE_RANDOM_RootPASS_20}
