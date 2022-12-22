@@ -12,20 +12,26 @@ version: '3.1'
 
 services:
   redmine:
+#    image: redmine:4.2.3
     image: redmine
     restart: always
     ports:
       - ${EXT_PORT}:3000
     environment:
-      REDMINE_DB_MYSQL: db
+      REDMINE_DB_POSTGRES: db
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
       REDMINE_DB_PASSWORD: ${ODS_SM_GENERATE_RANDOM_PASS_20}
       REDMINE_SECRET_KEY_BASE: ${ODS_SM_GENERATE_RANDOM_SecretKey_20}
 
   db:
-    image: mysql:5.7
+    image: postgres:10
     restart: always
+
     environment:
-      MYSQL_ROOT_PASSWORD: ${ODS_SM_GENERATE_RANDOM_PASS_20}
-      MYSQL_DATABASE: redmine
+      POSTGRES_PASSWORD: ${ODS_SM_GENERATE_RANDOM_PASS_20}
+      POSTGRES_USER: redmine
+      POSTGRES_DB: "redmine"
+      PGDATA: "/var/lib/postgresql/data"
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./redmine_db:/var/lib/postgresql/data
