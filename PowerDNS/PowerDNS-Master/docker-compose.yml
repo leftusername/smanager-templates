@@ -5,7 +5,7 @@ x-SManager:
     - "Slave: ${SLAVE_IP}"
   side_menu:
     - Ссылки:
-        PowerDNSAdmin: http://${ODS_SM_SERVER_IP}:9191
+        PowerDNSAdmin: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
   ui_edit_vars:
     Домен: DOMAIN
     Master IP: MASTER_IP
