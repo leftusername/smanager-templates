@@ -5,7 +5,6 @@ x-SManager:
   ui_edit_vars:
     Timezone: TZ
     CONSOLE: CONSOLE
-    ICON: ICON
     TYPE: TYPE
     VERSION: VERSION
     MEMORY: MEMORY
@@ -43,7 +42,6 @@ services:
       TZ: ${TZ}
       EULA: 'true'
       CONSOLE: ${CONSOLE}
-      ICON: ${ICON}
       TYPE: ${TYPE}
       VERSION: ${VERSION}
       MEMORY: ${MEMORY}
