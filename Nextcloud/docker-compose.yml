@@ -4,12 +4,13 @@ x-SManager:
         Nextcloud web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
   ui_edit_vars:
     Внешний порт: EXT_PORT
-  source:
-    branch: github
-    url: https://github.com/leftusername/smanager-templates.git
-    yaml_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/docker-compose.yml
-    readme_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/README.md
-
+#  source:
+#    branch: github
+#    url: https://github.com/leftusername/smanager-templates.git
+#    yaml_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/docker-compose.yml
+#    readme_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/README.md
+  script:
+    - wget https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/nginx.conf
 
 version: '2'
 
