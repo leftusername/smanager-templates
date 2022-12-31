@@ -1,0 +1,9 @@
+x-SManager:
+  tty_script:
+       - Install:
+           - ./bitwarden.sh install
+           - ./bitwarden.sh start
+
+  script:
+    - wget https://raw.githubusercontent.com/bitwarden/server/master/scripts/bitwarden.sh
+    - chmod +x bitwarden.sh

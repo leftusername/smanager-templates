@@ -1,0 +1,243 @@
+x-SManager:
+  properties:
+    - "Elasticsearch mem: ${ELASTIC_MEMORY_SIZE}"
+    - "    Workers count: ${SCALE_WORKER}"
+  side_menu:
+    - Manage:
+        OpenCTI: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+        Minio: http://${ODS_SM_SERVER_IP}:9000
+    - Connectors:
+        OpenCTI connectors: https://github.com/OpenCTI-Platform/connectors
+        Connectors documentation: https://filigran.notion.site/Connectors-4586c588462d4a1fb5e661f2d9837db8
+  ui_edit_vars:
+    Внешний порт: EXT_PORT
+    Admin email: OPENCTI_ADMIN_EMAIL
+    Admin password: ODS_SM_GENERATE_RANDOM_AdminPASS_20
+    Elasticsearch mem: ELASTIC_MEMORY_SIZE
+    Workers count: SCALE_WORKER
+  script:
+    - ulimit -n 65536
+    - sysctl -w vm.max_map_count=1048575
+
+version: '3'
+services:
+  redis:
+    image: redis:7.0.6
+    restart: always
+    volumes:
+      - redisdata:/data
+
+  elasticsearch01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+    container_name: elasticsearch01
+    environment:
+      - cluster.name=docker-cluster
+      - discovery.seed_hosts=elasticsearch02
+      - cluster.initial_master_nodes=elasticsearch01,elasticsearch02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}"
+#      - JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}
+      - node.name=elasticsearch01
+#      - node.processors=8
+#      - search.max_open_scroll_context=110000
+#      - search.max_buckets=50000
+      - xpack.ml.enabled=false
+      - xpack.security.enabled=false
+    restart: always
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+#    ports:
+#      - "9200:9200"
+#      - "9300"
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+
+  elasticsearch02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+    container_name: elasticsearch02
+    environment:
+      - cluster.name=docker-cluster
+      - discovery.seed_hosts=elasticsearch01
+      - cluster.initial_master_nodes=elasticsearch01,elasticsearch02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}"
+#      - JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}
+      - node.name=elasticsearch02
+#      - node.processors=8
+#      - search.max_open_scroll_context=110000
+#      - search.max_buckets=50000
+      - xpack.ml.enabled=false
+      - xpack.security.enabled=false
+    restart: always
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+#    ports:
+#      - "9300"
+    volumes:
+      - esdata02:/usr/share/elasticsearch/data
+
+  minio:
+    image: minio/minio:RELEASE.2022-09-25T15-44-53Z
+    volumes:
+      - s3data:/data
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${ODS_SM_GENERATE_RANDOM_MinioRootPass_20}
+    command: server /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: always
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${ODS_SM_GENERATE_RANDOM_RMQDefPass_20}
+    volumes:
+      - amqpdata:/var/lib/rabbitmq
+    restart: always
+  opencti:
+    image: opencti/platform:5.5.1
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=8096
+      - APP__PORT=${EXT_PORT}
+      - APP__BASE_URL=http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+      - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
+      - APP__ADMIN__PASSWORD=${ODS_SM_GENERATE_RANDOM_AdminPASS_20}
+      - APP__ADMIN__TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - APP__APP_LOGS__LOGS_LEVEL=error
+      - REDIS__HOSTNAME=redis
+      - REDIS__PORT=6379
+      - ELASTICSEARCH__URL=http://elasticsearch01:9200
+      - MINIO__ENDPOINT=minio
+      - MINIO__PORT=9000
+      - MINIO__USE_SSL=false
+      - MINIO__ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO__SECRET_KEY=${ODS_SM_GENERATE_RANDOM_MinioRootPass_20}
+      - RABBITMQ__HOSTNAME=rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__PORT_MANAGEMENT=15672
+      - RABBITMQ__MANAGEMENT_SSL=false
+      - RABBITMQ__USERNAME=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ__PASSWORD=${ODS_SM_GENERATE_RANDOM_RMQDefPass_20}
+      - SMTP__HOSTNAME=${SMTP_HOSTNAME}
+      - SMTP__PORT=25
+      - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
+    ports:
+      - "${EXT_PORT}:${EXT_PORT}"
+    depends_on:
+      - redis
+      - elasticsearch01
+      - elasticsearch02
+      - minio
+      - rabbitmq
+    restart: always
+  worker:
+    image: opencti/worker:5.5.1
+    environment:
+      - OPENCTI_URL=http://opencti:${EXT_PORT}
+      - OPENCTI_TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - WORKER_LOG_LEVEL=info
+    depends_on:
+      - opencti
+    deploy:
+      mode: replicated
+      replicas: ${SCALE_WORKER}
+    restart: always
+  connector-export-file-stix:
+    image: opencti/connector-export-file-stix:5.5.1
+    environment:
+      - OPENCTI_URL=http://opencti:${EXT_PORT}
+      - OPENCTI_TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - CONNECTOR_ID=${ODS_SM_GENERATE_UUIDv4_ConnExpFileStixID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
+      - CONNECTOR_NAME=ExportFileStix2
+      - CONNECTOR_SCOPE=application/json
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+    restart: always
+    depends_on:
+      - opencti
+  connector-export-file-csv:
+    image: opencti/connector-export-file-csv:5.5.1
+    environment:
+      - OPENCTI_URL=http://opencti:${EXT_PORT}
+      - OPENCTI_TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - CONNECTOR_ID=${ODS_SM_GENERATE_UUIDv4_ConnExpFileCSVID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
+      - CONNECTOR_NAME=ExportFileCsv
+      - CONNECTOR_SCOPE=text/csv
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+    restart: always
+    depends_on:
+      - opencti
+  connector-export-file-txt:
+    image: opencti/connector-export-file-txt:5.5.1
+    environment:
+      - OPENCTI_URL=http://opencti:${EXT_PORT}
+      - OPENCTI_TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - CONNECTOR_ID=${ODS_SM_GENERATE_UUIDv4_ConnExpFileTXTID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
+      - CONNECTOR_NAME=ExportFileTxt
+      - CONNECTOR_SCOPE=text/plain
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+    restart: always
+    depends_on:
+      - opencti
+  connector-import-file-stix:
+    image: opencti/connector-import-file-stix:5.5.1
+    environment:
+      - OPENCTI_URL=http://opencti:${EXT_PORT}
+      - OPENCTI_TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - CONNECTOR_ID=${ODS_SM_GENERATE_UUIDv4_ConnImportFileStixID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
+      - CONNECTOR_NAME=ImportFileStix
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_SCOPE=application/json,text/xml
+      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+    restart: always
+    depends_on:
+      - opencti
+  connector-import-document:
+    image: opencti/connector-import-document:5.5.1
+    environment:
+      - OPENCTI_URL=http://opencti:${EXT_PORT}
+      - OPENCTI_TOKEN=${ODS_SM_GENERATE_UUIDv4_OPENCTIADMINTOKEN}
+      - CONNECTOR_ID=${ODS_SM_GENERATE_UUIDv4_ConnImportDocID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
+      - CONNECTOR_NAME=ImportDocument
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_SCOPE=application/pdf,text/plain,text/html
+      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
+      - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+      - IMPORT_DOCUMENT_CREATE_INDICATOR=true
+    restart: always
+    depends_on:
+      - opencti
+
+volumes:
+  esdata01:
+  esdata02:
+  s3data:
+  redisdata:
+  amqpdata:
