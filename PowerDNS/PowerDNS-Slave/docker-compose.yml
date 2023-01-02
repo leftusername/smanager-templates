@@ -7,6 +7,9 @@ x-SManager:
     Домен: DOMAIN
     Master IP: MASTER_IP
     Slave IP: SLAVE_IP
+  tty_script:
+    - Force sync ${DOMAIN}:
+        - docker-compose exec powerdns_slave pdns_control retrieve ${DOMAIN}
 
 version: '3'
 

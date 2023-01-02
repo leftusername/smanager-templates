@@ -5,13 +5,15 @@ x-SManager:
     - "Slave: ${SLAVE_IP}"
   side_menu:
     - Ссылки:
-        PowerDNSAdmin: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+        PowerDNSAdmin: http://${MASTER_IP}:${EXT_PORT}
   ui_edit_vars:
     Домен: DOMAIN
     Master IP: MASTER_IP
     Slave IP: SLAVE_IP
     Внешний порт PowerDNSAdmin: EXT_PORT
-
+  tty_script:
+    - Force sync ${DOMAIN}:
+        - docker-compose exec powerdns pdns_control notify ${DOMAIN}
 
 version: '3'
 
