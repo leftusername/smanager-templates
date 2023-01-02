@@ -39,7 +39,7 @@ services:
       MYSQL_ENV_MYSQL_ROOT_PASSWORD: "${ODS_SM_GENERATE_RANDOM_dbrootpassword_20}"
     depends_on:
       - mysql
-    restart: always
+    restart: unless-stopped
 
   mysql:
     image: mariadb:10.5-focal
@@ -55,3 +55,4 @@ services:
     ports:
 #      - "3306:3306"
       - "3306"
+    restart: unless-stopped

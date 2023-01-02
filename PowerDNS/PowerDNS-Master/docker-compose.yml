@@ -52,6 +52,7 @@ services:
       - mysql
 #    links:
 #      - mysql
+    restart: unless-stopped
 
   powerdns-admin:
     image: aescanero/powerdns-admin
@@ -73,6 +74,7 @@ services:
 #    links:
 #      - mysql
 #      - powerdns
+    restart: unless-stopped
 
   mysql:
     image: mariadb:10.5-focal
@@ -90,3 +92,4 @@ services:
       - "3306"
 #volumes:
 #  pdnsdb:
+    restart: unless-stopped

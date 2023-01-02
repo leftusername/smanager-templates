@@ -10,13 +10,13 @@ x-SManager:
 #    yaml_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/docker-compose.yml
 #    readme_path: https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/README.md
   script:
-    - wget https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/nginx.conf
+    - wget -O nginx.conf https://raw.githubusercontent.com/leftusername/smanager-templates/github/Nextcloud/nginx.conf
 
 version: '2'
 
-volumes:
-  nextcloud:
-  db:
+#volumes:
+#  nextcloud:
+#  db:
 
 services:
   db:
