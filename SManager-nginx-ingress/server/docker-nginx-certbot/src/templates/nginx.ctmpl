@@ -54,10 +54,19 @@ server {
 
 {{range services}} {{if .Tags | contains "nginx"}} {{$name := .Name}} {{$service := service .Name}}
 {{range $service}}
-server {
-    {{ with .ServiceMeta }}server_name {{ .site_domain }};
-    {{else}}server_name meta_not_found.error; # if ServiceMeta site_domain not found in service{{end}}
 
+server {
+    {{ with .ServiceMeta }}
+    listen 443 ssl http2;
+    server_name {{ .site_domain }};
+
+
+#    ssl_certificate         /etc/letsencrypt/live/{{ .site_domain }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ .site_domain }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ .site_domain }}/chain.pem;
+
+
+    {{else}}server_name meta_not_found.error; # if ServiceMeta site_domain not found in service{{end}}
 
     location / {
    #     client_max_body_size 0;
