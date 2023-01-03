@@ -24,13 +24,13 @@ server {
     {{ with .ServiceMeta }}location /filebrowser_{{ .compose_name }}/ {
     {{else}}location /filebrowser_meta_not_found/ {  # if ServiceMeta user not found in service{{end}}
         client_max_body_size 0;
-        proxy_pass http://{{.Node}}:{{.Port}}/;
+        proxy_pass http://{{.Address}}:{{.Port}}/;
         proxy_set_header Host $host;
     }
     {{ with .ServiceMeta }}location /filebrowser_{{ .compose_name }}/index.php {
     {{else}}location /filebrowser_meta_not_found/ {  # if ServiceMeta user not found in service{{end}}
         client_max_body_size 0;
-        proxy_pass http://{{.Node}}:{{.Port}}/;
+        proxy_pass http://{{.Address}}:{{.Port}}/;
         proxy_set_header Host $host;
     }
 {{end}}
@@ -42,7 +42,7 @@ server {
     {{ with .ServiceMeta }}location /phpmyadmin_{{ .compose_name }} {
     {{else}}location /phpmyadmin_meta_not_found {  # if ServiceMeta user not found in service{{end}}
         client_max_body_size 3221225472;
-        proxy_pass http://{{.Node}}:{{.Port}}/;
+        proxy_pass http://{{.Address}}:{{.Port}}/;
         proxy_redirect off;
         proxy_set_header Host $host;
     }
@@ -55,29 +55,13 @@ server {
 {{range services}} {{if .Tags | contains "nginx"}} {{$name := .Name}} {{$service := service .Name}}
 {{range $service}}
 server {
-
-    listen 443 ssl;
-#    listen [::]:443 ssl ;
-
-    # Domain names this server should respond to.
-    {{ with .ServiceMeta }}server_name {{ .site_domain }} www.{{ .site_domain }};
-
-
-    # Load the certificate files.
-    ssl_certificate         /etc/letsencrypt/live/{{ .site_domain }}/fullchain.pem;
-    ssl_certificate_key     /etc/letsencrypt/live/{{ .site_domain }}/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/{{ .site_domain }}/chain.pem;
-
-    # Load the Diffie-Hellman parameter.
-    ssl_dhparam /etc/letsencrypt/dhparams/dhparam.pem;
-
-
+    {{ with .ServiceMeta }}server_name {{ .site_domain }};
     {{else}}server_name meta_not_found.error; # if ServiceMeta site_domain not found in service{{end}}
 
 
     location / {
    #     client_max_body_size 0;
-        proxy_pass http://{{.Node}}:{{.Port}} ;
+        proxy_pass http://{{.Address}}:{{.Port}} ;
         proxy_set_header Host              $host;
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP         $remote_addr;

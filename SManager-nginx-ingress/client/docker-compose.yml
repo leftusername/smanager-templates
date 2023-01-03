@@ -1,16 +1,17 @@
 x-SManager:
   script:
-    - docker-compose up consul-client
+    - docker-compose up -d consul-client
     - |
       docker-compose exec consul-client consul services register\
-      -name=${SITE_DOMAIN}\
+      -name=${ODS_SM_GENERATE_UUIDv4_0}\
       -address=${ODS_SM_GENERATE_UUIDv4_0}\
       -port=80\
       -tag=nginx\
       -meta="site_domain=${SITE_DOMAIN}"\
-      -meta="compose_name=${ODS_SM_COMPOSE_NAME}"
+      -meta="compose_name=${ODS_SM_COMPOSE_SYS_NAME}"
 
 version: "3"
+services:
   consul-client:
     command:  agent -node=client-1 -retry-join=consul
     image: ${CONSUL_IMAGE}
@@ -24,3 +25,7 @@ version: "3"
     - 80
     networks:
     - smanger-ingress-net
+
+networks:
+  smanger-ingress-net:
+    name: smanger-ingress-net

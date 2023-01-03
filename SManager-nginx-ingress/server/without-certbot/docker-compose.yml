@@ -35,5 +35,5 @@ services:
     restart: unless-stopped
 
 networks:
-  ods-hosting-net:
+  smanger-ingress-net:
     name: smanger-ingress-net
