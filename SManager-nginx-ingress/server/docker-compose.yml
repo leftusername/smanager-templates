@@ -1,0 +1,21 @@
+x-SManager:
+  properties:
+    - ${NGINX_IMAGE}
+    - ${CONSUL_IMAGE}
+
+version: "3"
+
+services:
+  consul:
+    image: ${CONSUL_IMAGE}
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - smanger-ingress-net
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+    restart: unless-stopped
+
+networks:
+  smanger-ingress-net:
+    name: smanger-ingress-net

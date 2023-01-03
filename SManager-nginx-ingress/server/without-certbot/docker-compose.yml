@@ -1,0 +1,39 @@
+x-SManager:
+  properties:
+    - ${NGINX_IMAGE}
+    - ${CONSUL_IMAGE}
+
+
+version: "3"
+
+services:
+  nginx:
+    image: ${NGINX_IMAGE}
+    environment:
+      - CONSUL_SERVER=consul
+      - CONSUL_PORT=8500
+    ports:
+      - "80:80"
+#      - "443:443"
+    networks:
+      - default
+      - smanger-ingress-net
+    depends_on:
+      - consul
+    restart: unless-stopped
+
+
+
+  consul:
+    image: ${CONSUL_IMAGE}
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - smanger-ingress-net
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+    restart: unless-stopped
+
+networks:
+  ods-hosting-net:
+    name: smanger-ingress-net
