@@ -1,6 +1,6 @@
-FROM 1.23.3-alpine
+FROM nginx:1.23.3-alpine
 LABEL version="1.0"
-LABEL description="Web server with consult-template for the provider part of the hosting role"
+LABEL description="Web server with consult-template"
 LABEL product="ODS SManager"
 
 # Устанавливаем  nginx, curl и unzip
