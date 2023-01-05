@@ -8,11 +8,11 @@ version: "3"
 services:
   consul:
     image: ${CONSUL_IMAGE}
-    ports:
-      - "8500:8500"
-      - "8600:8600/udp"
+#    ports:
+#      - "8500:8500"
+#      - "8600:8600/udp"
     networks:
-      - smanger-ingress-net
+      - smanager-ingress-net
     command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
     restart: unless-stopped
 
@@ -29,11 +29,11 @@ services:
       - ./user_conf.d:/etc/nginx/user_conf.d
     networks:
       - default
-      - smanger-ingress-net
+      - smanager-ingress-net
 
 volumes:
   nginx_secrets:
 
 networks:
-  smanger-ingress-net:
-    name: smanger-ingress-net
+  smanager-ingress-net:
+    name: smanager-ingress-net

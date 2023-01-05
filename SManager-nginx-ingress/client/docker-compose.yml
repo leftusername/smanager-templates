@@ -1,4 +1,6 @@
 x-SManager:
+  ui_edit_vars:
+    Domain: SITE_DOMAIN
   script:
     - docker-compose up -d consul-client
     - |
@@ -16,7 +18,7 @@ services:
     command:  agent -node=client-1 -retry-join=consul
     image: ${CONSUL_IMAGE}
     networks:
-    - smanger-ingress-net
+      - smanager-ingress-net
 
 # This example inbound service. replace it yours. add to your service hostname and networks from this example
   test-service:
@@ -25,9 +27,9 @@ services:
     ports:
     - 80
     networks:
-    - smanger-ingress-net
-    - default
+      - smanager-ingress-net
+      - default
 
 networks:
-  smanger-ingress-net:
-    name: smanger-ingress-net
+  smanager-ingress-net:
+    name: smanager-ingress-net

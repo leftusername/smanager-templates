@@ -17,7 +17,7 @@ services:
 #      - "443:443"
     networks:
       - default
-      - smanger-ingress-net
+      - smanager-ingress-net
     depends_on:
       - consul
     restart: unless-stopped
@@ -26,14 +26,14 @@ services:
 
   consul:
     image: ${CONSUL_IMAGE}
-    ports:
-      - "8500:8500"
-      - "8600:8600/udp"
+#    ports:
+#      - "8500:8500"
+#      - "8600:8600/udp"
     networks:
-      - smanger-ingress-net
+      - smanager-ingress-net
     command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
     restart: unless-stopped
 
 networks:
-  smanger-ingress-net:
-    name: smanger-ingress-net
+  smanager-ingress-net:
+    name: smanager-ingress-net
