@@ -1,0 +1,35 @@
+x-SManager:
+  ui_edit_vars:
+    Domain: SITE_DOMAIN
+  script:
+    - docker-compose up -d consul-client
+    - |
+      docker-compose exec consul-client consul services register\
+      -name=${ODS_SM_GENERATE_UUIDv4_0}\
+      -address=${ODS_SM_GENERATE_UUIDv4_0}\
+      -port=80\
+      -tag=nginx\
+      -meta="site_domain=${SITE_DOMAIN}"\
+      -meta="compose_name=${ODS_SM_COMPOSE_SYS_NAME}"
+
+version: "3"
+services:
+  consul-client:
+    command:  agent -node=client-1 -retry-join=consul
+    image: ${CONSUL_IMAGE}
+    networks:
+      - smanager-ingress-net
+
+# This example inbound service. replace it yours. add to your service hostname and networks from this example
+  test-service:
+    hostname: ${ODS_SM_GENERATE_UUIDv4_0}
+    image: nginx:1.23.3-alpine
+    ports:
+    - 80
+    networks:
+      - smanager-ingress-net
+      - default
+
+networks:
+  smanager-ingress-net:
+    name: smanager-ingress-net

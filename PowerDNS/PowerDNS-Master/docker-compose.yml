@@ -5,13 +5,15 @@ x-SManager:
     - "Slave: ${SLAVE_IP}"
   side_menu:
     - Ссылки:
-        PowerDNSAdmin: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
+        PowerDNSAdmin: http://${MASTER_IP}:${EXT_PORT}
   ui_edit_vars:
     Домен: DOMAIN
     Master IP: MASTER_IP
     Slave IP: SLAVE_IP
     Внешний порт PowerDNSAdmin: EXT_PORT
-
+  tty_script:
+    - Force sync ${DOMAIN}:
+        - docker-compose exec powerdns pdns_control notify ${DOMAIN}
 
 version: '3'
 
@@ -50,6 +52,7 @@ services:
       - mysql
 #    links:
 #      - mysql
+    restart: unless-stopped
 
   powerdns-admin:
     image: aescanero/powerdns-admin
@@ -71,6 +74,7 @@ services:
 #    links:
 #      - mysql
 #      - powerdns
+    restart: unless-stopped
 
   mysql:
     image: mariadb:10.5-focal
@@ -88,3 +92,4 @@ services:
       - "3306"
 #volumes:
 #  pdnsdb:
+    restart: unless-stopped

@@ -23,3 +23,5 @@ Web-портал для совместной работы и реализаци�
 
 Подробнее о Nextcloud на [Википедии](https://ru.wikipedia.org/wiki/Nextcloud).
 
+## Https and SSL
+This is ingress ready template. To encrypt trafic with SSL you need set `SITE_DOMAIN` variable and install **SManager-nginx-ingress** role
