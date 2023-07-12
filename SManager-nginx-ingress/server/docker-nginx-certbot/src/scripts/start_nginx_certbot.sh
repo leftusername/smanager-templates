@@ -45,7 +45,8 @@ export CONSUL_PORT=${CONSUL_PORT:-8500}
 export CONSUL_SERVER=${CONSUL_SERVER:-consul}
 export CONSUL=$CONSUL_SERVER:$CONSUL_PORT
 echo -e "\e[1;34mInfo\e[0m":" [nginx] connect to CONSUL: " $CONSUL
-consul-template --log-level=debug -consul-addr $CONSUL -template "/etc/consul-template/templates/nginx.ctmpl:/etc/nginx/conf.d/consul-template.conf:kill -s HUP $NGINX_PID" &
+#consul-template --log-level=debug -consul-addr $CONSUL -template "/etc/consul-template/templates/nginx.ctmpl:/etc/nginx/conf.d/consul-template.conf:kill -s HUP $NGINX_PID" &
+consul-template --log-level=debug -consul-addr $CONSUL -template "/etc/consul-template/templates/nginx.ctmpl:/etc/nginx/conf.d/consul-template.conf:kill -s HUP 1" &
 
 info "Starting the autorenewal service"
 # Make sure a renewal interval is set before continuing.
