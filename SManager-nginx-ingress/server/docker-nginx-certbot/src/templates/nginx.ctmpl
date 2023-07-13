@@ -5,18 +5,7 @@ server {
 #    access_log /var/log/nginx/reverse-access.log;
 #    error_log /var/log/nginx/reverse-error.log;
 
-# gotty proxy
-location ~ ^\/gotty\/([^\/]+)\/([^\/]+)\/ {
-        client_max_body_size 0;
-        resolver 127.0.0.11;
 
-          proxy_pass http://smanager:$2;
-          proxy_set_header X-Forwarded-For $remote_addr;
-          proxy_set_header Host $host;
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
-    }
 
 # это для hurlenco/filebrowser
 #    location /filebrowser {
@@ -64,6 +53,56 @@ location ~ ^\/gotty\/([^\/]+)\/([^\/]+)\/ {
 {{end}}
 
 }
+
+
+
+{{range services}} {{if .Tags | contains "smanager"}} {{$name := .Name}} {{$service := service .Name}}
+{{range $service}}
+
+server {
+    {{ with .ServiceMeta }}
+    listen 443 ssl http2;
+    server_name {{ .site_domain }};
+
+
+    ssl_certificate         /etc/letsencrypt/live/{{ .site_domain }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ .site_domain }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ .site_domain }}/chain.pem;
+
+
+    {{else}}server_name meta_not_found.error; # if ServiceMeta site_domain not found in service{{end}}
+
+    # gotty proxy
+    location ~ ^\/gotty\/([^\/]+)\/([^\/]+)\/ {
+            client_max_body_size 0;
+            resolver 127.0.0.11;
+            set $target http://{{.Address}}:$2;
+              proxy_pass http://$target;
+              proxy_set_header X-Forwarded-For $remote_addr;
+              proxy_set_header Host $host;
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+        }
+
+    location / {
+   #     client_max_body_size 0;
+        resolver 127.0.0.11;
+        set $target {{.Address}}:{{.Port}};
+        proxy_pass http://$target;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port  $server_port;
+    }
+}
+{{end}}
+{{end}}
+{{end}}
+
+
 
 {{range services}} {{if .Tags | contains "nginx"}} {{$name := .Name}} {{$service := service .Name}}
 {{range $service}}
