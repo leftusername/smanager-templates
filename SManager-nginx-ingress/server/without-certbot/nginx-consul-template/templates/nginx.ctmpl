@@ -1,3 +1,5 @@
+server_names_hash_bucket_size 64;
+
 server {
     listen 80;
 #    listen [::]:80;
@@ -18,63 +20,21 @@ location ~ ^\/gotty\/([^\/]+)\/([^\/]+)\/ {
           proxy_set_header Connection "upgrade";
     }
 
-# это для hurlenco/filebrowser
-#    location /filebrowser {
-#        client_max_body_size 0;
-##        proxy_pass http://filebrowser:8080;
-#        proxy_pass http://filebrowser:80;
-#        proxy_set_header Host              $host;
-#        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-#        proxy_set_header X-Real-IP         $remote_addr;
-#        proxy_set_header X-Forwarded-Host  $host;
-#        proxy_set_header X-Forwarded-Proto $scheme;
-#        proxy_set_header X-Forwarded-Port  $server_port;
-#    }
-
-# это для tiny file manager
-{{range services}} {{if .Tags | contains "filebrowser"}} {{$name := .Name}} {{$service := service .Name}}
-{{range $service}}
-    {{ with .ServiceMeta }}location /filebrowser_{{ .compose_name }}/ {
-    {{else}}location /filebrowser_meta_not_found/ {  # if ServiceMeta user not found in service{{end}}
-        client_max_body_size 0;
-        proxy_pass http://{{.Address}}:{{.Port}}/;
-        proxy_set_header Host $host;
-    }
-    {{ with .ServiceMeta }}location /filebrowser_{{ .compose_name }}/index.php {
-    {{else}}location /filebrowser_meta_not_found/ {  # if ServiceMeta user not found in service{{end}}
-        client_max_body_size 0;
-        proxy_pass http://{{.Address}}:{{.Port}}/;
-        proxy_set_header Host $host;
-    }
-{{end}}
-{{end}}
-{{end}}
-
-{{range services}} {{if .Tags | contains "phpmyadmin"}} {{$name := .Name}} {{$service := service .Name}}
-{{range $service}}
-    {{ with .ServiceMeta }}location /phpmyadmin_{{ .compose_name }} {
-    {{else}}location /phpmyadmin_meta_not_found {  # if ServiceMeta user not found in service{{end}}
-        client_max_body_size 3221225472;
-        proxy_pass http://{{.Address}}:{{.Port}}/;
-        proxy_redirect off;
-        proxy_set_header Host $host;
-    }
-{{end}}
-{{end}}
-{{end}}
-
 }
 
 {{range services}} {{if .Tags | contains "nginx"}} {{$name := .Name}} {{$service := service .Name}}
 {{range $service}}
 server {
+    listen 80;
     {{ with .ServiceMeta }}server_name {{ .site_domain }};
     {{else}}server_name meta_not_found.error; # if ServiceMeta site_domain not found in service{{end}}
 
 
     location / {
    #     client_max_body_size 0;
-        proxy_pass http://{{.Address}}:{{.Port}} ;
+        resolver 127.0.0.11;
+        set $target {{.Address}}:{{.Port}};
+        proxy_pass http://$target;
         proxy_set_header Host              $host;
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP         $remote_addr;

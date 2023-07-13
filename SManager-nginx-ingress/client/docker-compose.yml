@@ -9,13 +9,12 @@ x-SManager:
       -address=${ODS_SM_GENERATE_UUIDv4_0}\
       -port=80\
       -tag=nginx\
-      -meta="site_domain=${SITE_DOMAIN}"\
-      -meta="compose_name=${ODS_SM_COMPOSE_SYS_NAME}"
+      -meta="site_domain=${SITE_DOMAIN}"
 
 version: "3"
 services:
   consul-client:
-    command:  agent -node=client-1 -retry-join=consul
+    command:  agent -node=client-${ODS_SM_GENERATE_UUIDv4_0} -retry-join=consul
     image: ${CONSUL_IMAGE}
     networks:
       - smanager-ingress-net
@@ -24,8 +23,9 @@ services:
   test-service:
     hostname: ${ODS_SM_GENERATE_UUIDv4_0}
     image: nginx:1.23.3-alpine
-    ports:
-    - 80
+# port 80 and 443 should be closed
+#    ports:
+#    - 80
     networks:
       - smanager-ingress-net
       - default
