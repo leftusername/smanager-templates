@@ -8,7 +8,7 @@ x-SManager:
     - "DB version: ${DB_IMAGE}"
   ui_edit_vars:
     Domain: SITE_DOMAIN
-    Joomla version: ${JOOMLA_IMAGE}
+    Joomla version: JOOMLA_IMAGE
   script:
     - docker-compose up -d consul-client
     - |
