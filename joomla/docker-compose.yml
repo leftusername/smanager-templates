@@ -1,0 +1,72 @@
+x-SManager:
+  side_menu:
+    - Links:
+        Web site: http://${SITE_DOMAIN}
+  properties:
+    - "Domain: ${SITE_DOMAIN}"
+    - "Joomla version: ${JOOMLA_IMAGE}"
+    - "DB version: ${DB_IMAGE}"
+  ui_edit_vars:
+    Domain: SITE_DOMAIN
+    Joomla version: ${JOOMLA_IMAGE}
+  script:
+    - docker-compose up -d consul-client
+    - |
+      docker-compose exec consul-client consul services register\
+      -name=${ODS_SM_GENERATE_UUIDv4_0}\
+      -address=${ODS_SM_GENERATE_UUIDv4_0}\
+      -port=80\
+      -tag=nginx\
+      -meta="site_domain=${SITE_DOMAIN}"\
+      -meta="compose_name=${ODS_SM_COMPOSE_SYS_NAME}"
+
+version: '3.1'
+
+services:
+  joomla:
+    hostname: ${ODS_SM_GENERATE_UUIDv4_0}
+    image: ${JOOMLA_IMAGE}
+    restart: always
+    links:
+      - joomladb:mysql
+#    ports:
+#      - 8082:80
+    environment:
+      JOOMLA_DB_HOST: joomladb
+      JOOMLA_DB_PASSWORD: ${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+      JOOMLA_DB_USER: root
+    volumes:
+      - ./joomla-data:/var/www/html
+    networks:
+      - smanager-ingress-net
+      - default
+
+  joomladb:
+    image: ${DB_IMAGE}
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+    volumes:
+      - ./mariadb-data:/var/lib/mysql
+
+  consul-client:
+    command:  agent -node=client-1 -retry-join=consul
+    image: ${CONSUL_IMAGE}
+    networks:
+      - smanager-ingress-net
+
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin:5.2.0
+#    ports:
+#      - 8083:80
+#    environment:
+#      - PMA_ARBITRARY=1
+##      - PMA_HOST=mariadb
+#    depends_on:
+#      - joomladb
+#    restart: unless-stopped
+
+networks:
+  smanager-ingress-net:
+    name: smanager-ingress-net
+
