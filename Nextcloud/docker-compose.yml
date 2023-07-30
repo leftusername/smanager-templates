@@ -25,7 +25,7 @@ version: '3'
 
 services:
   db:
-    image: mariadb
+    image: mariadb:11.0.2
     restart: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     environment:
@@ -52,6 +52,7 @@ services:
 
   web:
     image: nginx
+    hostname: ${ODS_SM_GENERATE_UUIDv4_0}
     restart: always
     ports:
       - ${EXT_PORT}:80
