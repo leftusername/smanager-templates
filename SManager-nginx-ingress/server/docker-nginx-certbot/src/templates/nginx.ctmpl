@@ -86,7 +86,7 @@ server {
         }
 
     location / {
-   #     client_max_body_size 0;
+        client_max_body_size 0;
         resolver 127.0.0.11;
         set $target {{.Address}}:{{.Port}};
         proxy_pass http://$target;
@@ -121,7 +121,7 @@ server {
     {{else}}server_name meta_not_found.error; # if ServiceMeta site_domain not found in service{{end}}
 
     location / {
-   #     client_max_body_size 0;
+        client_max_body_size 0;
         resolver 127.0.0.11;
         set $target {{.Address}}:{{.Port}};
         proxy_pass http://$target;
