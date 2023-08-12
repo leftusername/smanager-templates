@@ -20,7 +20,7 @@ x-SManager:
       -meta="site_domain=${SITE_DOMAIN}"\
       -meta="compose_name=${ODS_SM_COMPOSE_SYS_NAME}"
 
-version: '3.1'
+version: '3.5'
 
 services:
   joomla:
@@ -50,7 +50,7 @@ services:
       - ./mariadb-data:/var/lib/mysql
 
   consul-client:
-    command:  agent -node=client-1 -retry-join=consul
+    command:  agent -node=client-${ODS_SM_GENERATE_UUIDv4_0} -retry-join=consul
     image: ${CONSUL_IMAGE}
     networks:
       - smanager-ingress-net
