@@ -1,0 +1,27 @@
+x-SManager:
+  properties:
+    - "${RABBITMQ_IMAGE}"
+  side_menu:
+    - WEB интерфейсы:
+        RMQ Management: http://${ODS_SM_SERVER_IP}:15672
+  ui_edit_vars:
+    RMQ version: RABBITMQ_IMAGE
+
+version: '3'
+
+services:
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE}
+    hostname: rabbitmq
+    volumes:
+#        - ./.docker/rabbitmq/etc/:/etc/rabbitmq/
+      - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
+#        - ./.docker/rabbitmq/logs/:/var/log/rabbitmq/
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
+      - RABBITMQ_DEFAULT_USER=${RMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${ODS_SM_GENERATE_RANDOM_RMQDefaultPASS_20}
+    ports:
+      - 5672:5672
+      - 15672:15672
+    restart: always

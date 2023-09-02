@@ -18,6 +18,7 @@ services:
     image: ${CONSUL_IMAGE}
     networks:
       - smanager-ingress-net
+    restart: unless-stopped
 
 # This example inbound service. replace it yours. add to your service hostname and networks from this example
   test-service:

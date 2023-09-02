@@ -4,7 +4,9 @@ x-SManager:
         GitLab web: http://${ODS_SM_SERVER_IP}:${EXT_PORT}
   ui_edit_vars:
     Внешний порт: EXT_PORT
-
+  tty_script:
+    - Сброс пароля root:
+        - docker-compose exec web gitlab-rake "gitlab:password:reset[root]"
 services:
   web:
     image: 'gitlab/gitlab-ce:14.0.1-ce.0'

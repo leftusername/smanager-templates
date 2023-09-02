@@ -9,8 +9,7 @@ version: '3.4'
 
 services:
   samba:
-    command: -s "Mount;/mnt" -s "Bobs Volume;/mnt2;yes;no;no;${LOGIN}" -u "${LOGIN};${ODS_SM_GENERATE_RANDOM_0_20}"
-      -p
+    command: '-s "Mount;/mnt" -s "Bobs Volume;/mnt2;yes;no;no;${LOGIN}" -u "${LOGIN};${ODS_SM_GENERATE_RANDOM_0_20}" -p'
     environment:
       TZ: ${TIMEZONE}
     image: dperson/samba
