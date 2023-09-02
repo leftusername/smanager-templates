@@ -66,10 +66,11 @@ services:
       - default
 
   consul-client:
-    command:  agent -node=client-1 -retry-join=consul
+    command:  agent -node=client-${ODS_SM_GENERATE_UUIDv4_0} -retry-join=consul
     image: ${CONSUL_IMAGE}
     networks:
       - smanager-ingress-net
+    restart: unless-stopped
 
 networks:
   smanager-ingress-net:

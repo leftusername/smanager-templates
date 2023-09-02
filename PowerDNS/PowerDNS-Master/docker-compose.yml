@@ -21,8 +21,8 @@ services:
   powerdns:
     image: pschiffe/pdns-mysql:alpine
     ports:
-      - "53:53/udp"
-      - "53:53"
+      - "${ODS_SM_SERVER_IP}:53:53/udp"
+      - "${ODS_SM_SERVER_IP}:53:53"
 #      - "8088:8081"
     extra_hosts:
       - 'ns1.${DOMAIN}:${SLAVE_IP}'
@@ -87,9 +87,8 @@ services:
 #      MYSQL_INITDB_SKIP_TZINFO: "1"
     volumes:
     - ./pdnsdb:/var/lib/mysql
-    ports:
+#    ports:
 #      - "3306:3306"
-      - "3306"
 #volumes:
 #  pdnsdb:
     restart: unless-stopped

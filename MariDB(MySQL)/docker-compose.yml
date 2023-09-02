@@ -9,8 +9,8 @@ x-SManager:
     - "Database ext port: ${DB_EXT_PORT}"
   side_menu:
     - WEB интерфейсы:
-        Adminer: http://${ODS_SM_SERVER_IP}:15672
-        phpMyAdmin: http://${ODS_SM_SERVER_IP}:5001
+        Adminer: http://${ODS_SM_SERVER_IP}:${ADMINER_EXT_PORT}
+        phpMyAdmin: http://${ODS_SM_SERVER_IP}:${PHPMYADMIN_EXT_PORT}
   ui_edit_vars:
     DB Root Password: ODS_SM_GENERATE_RANDOM_RootPASS_20
     DB password: ODS_SM_GENERATE_RANDOM_UserPASS_20
@@ -50,6 +50,7 @@ services:
       - ${PHPMYADMIN_EXT_PORT}:80
     environment:
       - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=300M
 #      - PMA_HOST=mariadb
     depends_on:
       - db

@@ -3,7 +3,7 @@ x-SManager:
     - ${NGINX_IMAGE}
     - ${CONSUL_IMAGE}
 
-version: "3"
+version: "3.5"
 
 services:
   consul:
