@@ -41,7 +41,7 @@ networks:
 2. Change `docker-compose.yml` file and `.env` file in [advanced editor](./advanced/edit) (if needed)
 3. Deploy role to your server  
 **Important**: first deploy will **failed** it is **normal**, because you still not placed `Dockerfile`
-4. Channge(if needed) and place [Dockerfile](./advanced/edit) in `php` directory on your server (by default roles stored in /opt/username)  
+4. Channge(if needed) and place [Dockerfile](https://raw.githubusercontent.com/leftusername/smanager-templates/github/php/php/Dockerfile) in `php` directory on your server (by default roles stored in /opt/username)  
 5. Place code of your project in `php/src` directory  
 6. Redeploy you role
 

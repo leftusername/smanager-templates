@@ -1,6 +1,5 @@
 FROM php:7.2-apache
-LABEL version="1.0"
-LABEL description="php-fpm "
+LABEL description="php-apache template"
 LABEL product="ODS SManager"
 
 # Install system dependencies
