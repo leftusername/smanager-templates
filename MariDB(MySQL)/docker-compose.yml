@@ -7,6 +7,7 @@ x-SManager:
     - "Adminer ext port: ${ADMINER_EXT_PORT}"
     - "phpMyAdmin ext port: ${PHPMYADMIN_EXT_PORT}"
     - "Database ext port: ${DB_EXT_PORT}"
+    - "Database image: ${DB_IMAGE}"
   side_menu:
     - WEB интерфейсы:
         Adminer: http://${ODS_SM_SERVER_IP}:${ADMINER_EXT_PORT}
@@ -22,8 +23,7 @@ x-SManager:
 version: '3.1'
 services:
   db:
-#    image: mysql
-    image: mariadb
+    image: ${DB_IMAGE}
     restart: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     ports:

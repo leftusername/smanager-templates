@@ -75,7 +75,7 @@ services:
 networks:
   smanager-ingress-net:
     name: smanager-ingress-net
-
+    external: true
 #volumes:
 #  nextcloud:
 #  db:
