@@ -22,6 +22,9 @@ services:
 
 # This example inbound service. replace it yours. add to your service hostname and networks from this example
   test-service:
+    # 'hostname' is not compatible with old docker.
+    # if you use old version of docker, when you must use 'container_name' instead hostname
+#    container_name: ${ODS_SM_GENERATE_UUIDv4_0}
     hostname: ${ODS_SM_GENERATE_UUIDv4_0}
     image: nginx:1.23.3-alpine
 # port 80 and 443 should be closed
@@ -34,3 +37,4 @@ services:
 networks:
   smanager-ingress-net:
     name: smanager-ingress-net
+    external: true

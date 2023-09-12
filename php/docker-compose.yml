@@ -1,0 +1,80 @@
+x-SManager:
+  ui_edit_vars:
+    Domain: SITE_DOMAIN
+    DB version: DB_IMAGE
+  properties:
+    - "Domain: ${SITE_DOMAIN}"
+    - "DB version: ${DB_IMAGE}"
+  side_menu:
+    - Управление:
+        Site: http://${SITE_DOMAIN}
+        phpMyAdmin: http://${SITE_DOMAIN}:${PHPMYADMIN_EXT_PORT}
+  script:
+    - docker-compose build
+    - docker-compose up -d consul-client
+    - |
+      docker-compose exec consul-client consul services register\
+      -name=${ODS_SM_GENERATE_UUIDv4_0}\
+      -address=${ODS_SM_GENERATE_UUIDv4_0}\
+      -port=80\
+      -tag=nginx\
+      -meta="site_domain=${SITE_DOMAIN}"
+
+
+version: '3.8'
+services:
+  consul-client:
+    command:  agent -node=client-${ODS_SM_GENERATE_UUIDv4_0} -retry-join=consul
+    image: ${CONSUL_IMAGE}
+    networks:
+      - smanager-ingress-net
+    restart: unless-stopped
+
+  php-apache:
+#   'hostname' is not compatible with old docker.
+#   if you use old version of docker, when you must use 'container_name' instead hostname
+#    container_name: ${ODS_SM_GENERATE_UUIDv4_0}
+    hostname: ${ODS_SM_GENERATE_UUIDv4_0}
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./php/src:/var/www/html/
+# port 80 and 443 should be closed if you use ingress
+#    ports:
+#    - 80
+    networks:
+      - smanager-ingress-net
+      - default
+
+  db:
+    image: ${DB_IMAGE}
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+#    ports:
+#      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ODS_SM_GENERATE_RANDOM_RootPASS_20}
+      - MYSQL_PASSWORD=${ODS_SM_GENERATE_RANDOM_UserPASS_20}
+      - MYSQL_DATABASE=database
+      - MYSQL_USER=user
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.0
+    ports:
+      - ${PHPMYADMIN_EXT_PORT}:80
+    environment:
+      - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=300M
+#      - PMA_HOST=mariadb
+    depends_on:
+      - db
+
+networks:
+  smanager-ingress-net:
+    name: smanager-ingress-net
+    external: true
